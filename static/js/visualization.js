@@ -10,6 +10,9 @@ class AgentVisualization {
         this.loadingPromise = null;  // Add this line
         this.loadedRuns = new Set();  // Add this line
         this.isLoadingRuns = false;   // Add this line
+        this.loadingQueue = [];
+        this.isProcessingQueue = false;
+        this.loadingStrategy = 'sparse'; // 'sparse' or 'fill'
 
         // Get DOM elements with task-specific IDs
         this.mainFrame = document.getElementById(`mainFrame_${taskType}`);
@@ -24,70 +27,105 @@ class AgentVisualization {
     }
 
     async loadRuns() {
-        // Fetch runs from a static JSON file instead of a flask API endpoint.
         const response = await fetch(`/static/runs/${this.taskType}/runs.json`);
         this.runs = await response.json();
         if (this.runs.length > 0) {
-            // Load current run first
-            await this.preloadAllImages();
+            // First load sparse frames for all runs
+            await this.initializeSparseLoading();
+            // Then load current run completely
+            await this.loadRunCompletely(this.currentRun);
             this.updateVisualization();
-            // Start loading other runs in the background
-            this.loadRemainingRuns();
+            // Start background loading
+            this.startBackgroundLoading();
         }
     }
 
-    async loadRemainingRuns() {
-        if (this.isLoadingRuns) return;
-        this.isLoadingRuns = true;
+    async initializeSparseLoading() {
+        for (let runIndex = 0; runIndex < this.runs.length; runIndex++) {
+            const run = this.runs[runIndex];
+            const totalFrames = run.frame_count;
+            // Load every 10th frame initially
+            for (let frame = 0; frame < totalFrames; frame += 10) {
+                await this.loadSingleFrame(runIndex, frame);
+            }
+        }
+    }
 
-        try {
+    async loadRunCompletely(runIndex) {
+        const run = this.runs[runIndex];
+        const totalFrames = run.frame_count;
+        for (let frame = 0; frame < totalFrames; frame++) {
+            await this.loadSingleFrame(runIndex, frame);
+        }
+        this.loadedRuns.add(runIndex);
+    }
+
+    async loadSingleFrame(runIndex, frame) {
+        const run = this.runs[runIndex];
+        const paddedFrame = String(frame).padStart(4, '0');
+        const mainUrl = `/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
+        const memoryUrl = `/static/runs/${this.taskType}/${run.id}/images/memory_${paddedFrame}.png`;
+
+        const promises = [];
+        for (const url of [mainUrl, memoryUrl]) {
+            if (!this.imageCache.has(url)) {
+                promises.push(this.loadImage(url));
+            }
+        }
+        await Promise.all(promises);
+    }
+
+    loadImage(url) {
+        if (this.imageCache.has(url)) {
+            return Promise.resolve(this.imageCache.get(url));
+        }
+
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                this.imageCache.set(url, img);
+                resolve(img);
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
+    }
+
+    startBackgroundLoading() {
+        if (!this.isProcessingQueue) {
+            this.isProcessingQueue = true;
+            this.processLoadingQueue();
+        }
+    }
+
+    async processLoadingQueue() {
+        while (true) {
+            // First, fill gaps in current run
+            await this.fillGapsInRun(this.currentRun);
+            
+            // Then load other runs completely
             for (let i = 0; i < this.runs.length; i++) {
                 if (i !== this.currentRun && !this.loadedRuns.has(i)) {
-                    const prevRun = this.currentRun;
-                    this.currentRun = i;
-                    await this.preloadAllImages();
-                    this.loadedRuns.add(i);
-                    this.currentRun = prevRun;
+                    await this.loadRunCompletely(i);
                 }
             }
-        } finally {
-            this.isLoadingRuns = false;
+            
+            await new Promise(resolve => setTimeout(resolve, 100)); // Prevent CPU hogging
         }
     }
 
-    async preloadAllImages() {
-        if (this.runs.length === 0) return;
-        if (this.loadedRuns.has(this.currentRun)) return;
-        
-        const run = this.runs[this.currentRun];
+    async fillGapsInRun(runIndex) {
+        const run = this.runs[runIndex];
         const totalFrames = run.frame_count;
         
-        const loadPromises = [];
-        
-        for (let frame = 0; frame <= totalFrames - 1; frame++) {
+        for (let frame = 0; frame < totalFrames; frame++) {
             const paddedFrame = String(frame).padStart(4, '0');
-            // Update URL endpoints to use static paths (pure JavaScript)
             const mainUrl = `/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
-            const memoryUrl = `/static/runs/${this.taskType}/${run.id}/images/memory_${paddedFrame}.png`;
             
-            for (const url of [mainUrl, memoryUrl]) {
-                if (!this.imageCache.has(url)) {
-                    const promise = new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.onload = () => resolve();
-                        img.onerror = () => reject();
-                        img.src = url;
-                        this.imageCache.set(url, img);
-                    });
-                    loadPromises.push(promise);
-                }
+            if (!this.imageCache.has(mainUrl)) {
+                await this.loadSingleFrame(runIndex, frame);
             }
         }
-        
-        this.loadingPromise = Promise.all(loadPromises);
-        await this.loadingPromise;
-
-        this.loadedRuns.add(this.currentRun);
     }
 
     setupEventListeners() {
@@ -103,19 +141,20 @@ class AgentVisualization {
 
     async changeRun(delta) {
         const newRun = (this.currentRun + delta + this.runs.length) % this.runs.length;
-        
-        // If the new run isn't loaded yet, load it
-        if (!this.loadedRuns.has(newRun)) {
-            const prevRun = this.currentRun;
-            this.currentRun = newRun;
-            await this.preloadAllImages();
-            // Continue loading remaining runs in the background
-            this.loadRemainingRuns();
-        }
-        
         this.currentRun = newRun;
         this.currentFrame = 0;
+        
+        // Ensure we have at least sparse frames loaded
+        if (!this.loadedRuns.has(newRun)) {
+            await this.loadSingleFrame(newRun, 0);
+        }
+        
         this.updateVisualization();
+        
+        // Priority load the new current run
+        this.loadRunCompletely(newRun).then(() => {
+            this.startBackgroundLoading();
+        });
     }
 
     updateVisualization() {
@@ -139,8 +178,47 @@ class AgentVisualization {
             this.memoryHeatmap.src = this.imageCache.get(memoryUrl).src;
         }
         
+        // Add fallback for missing frames
+        if (!this.imageCache.has(mainUrl)) {
+            // Find nearest loaded frame
+            const frame = this.findNearestLoadedFrame(run.id, this.currentFrame);
+            const paddedNearestFrame = String(frame).padStart(4, '0');
+            const fallbackMainUrl = `/static/runs/${this.taskType}/${run.id}/images/env_${paddedNearestFrame}.png`;
+            const fallbackMemoryUrl = `/static/runs/${this.taskType}/${run.id}/images/memory_${paddedNearestFrame}.png`;
+            
+            if (this.imageCache.has(fallbackMainUrl)) {
+                this.mainFrame.src = this.imageCache.get(fallbackMainUrl).src;
+            }
+            if (this.imageCache.has(fallbackMemoryUrl)) {
+                this.memoryHeatmap.src = this.imageCache.get(fallbackMemoryUrl).src;
+            }
+        } else {
+            this.mainFrame.src = this.imageCache.get(mainUrl).src;
+            this.memoryHeatmap.src = this.imageCache.get(memoryUrl).src;
+        }
+
         this.frameNumber.textContent = this.currentFrame;
         this.maxFrame.textContent = this.maxFrames;
         this.runInfo.textContent = `Run ${this.currentRun + 1} of ${this.runs.length}`;
+    }
+
+    findNearestLoadedFrame(runId, targetFrame) {
+        let step = 1;
+        while (step < 20) {
+            // Check frames before and after the target
+            for (let offset of [0, -step, step]) {
+                const frame = targetFrame + offset;
+                if (frame < 0) continue;
+                
+                const paddedFrame = String(frame).padStart(4, '0');
+                const url = `/static/runs/${this.taskType}/${runId}/images/env_${paddedFrame}.png`;
+                
+                if (this.imageCache.has(url)) {
+                    return frame;
+                }
+            }
+            step++;
+        }
+        return 0; // Fallback to first frame if nothing found
     }
 }
