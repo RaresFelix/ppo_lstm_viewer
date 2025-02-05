@@ -46,6 +46,7 @@
         <p class="text-lg"><strong>TLDR:</strong> I implemented PPO+LSTM from scratch and got it to solve three increasingly complex tasks: cartpole without velocity information, a memory-based navigation task, and finally a partially observable maze where the agent can only see a 3x3 area around itself, achieving an 80% success rate on 13x13 mazes with time limit 256 steps.</p>
     </div>
 
+
     <section class="mb-12">
         <h2 class="text-2xl font-bold mb-4">History</h2>
         <p class="text-gray-600 mb-6">On April 13th, 2019, OpenAI's Dota 2 AI system, OpenAI Five, became the first AI to beat a world champion team in an esports game. The algorithm behind this was proximal policy optimization(PPO) with LSTMs, which, given enough compute (a few thousand years of self-play), enabled it to achieve superhuman performance.</p>
@@ -79,10 +80,11 @@
         </div> -->
 
         <p class="text-gray-600 mb-6">For the agent to be able to form long-term connections, I used an LSTM (long short-term memory). It's a type of recurrent neural network that can handle longer term dependencies well. Chris Olah has a very good article on how LSTMs work <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs" class="text-blue-600 hover:underline">here</a>.</p>
-
+        <!--
         <div class="bg-red-100 border-l-4 border-red-500 p-4 mb-6">
             <p class="text-red-700">TODO: Add image of observation + lstm -> hidden states / features</p>
         </div>
+        </div> -->
 
         <p class="text-gray-600 mb-6">These hidden states / features act as memory for the agent. These can be used by the actor head to predict the best action, or by the critic head to predict "how good" the current state is (this is very useful during training).</p>
     </section>
@@ -94,6 +96,7 @@
         
         <p class="text-gray-600 mb-6">You can play it yourself below. The interesting thing about it is that the human brain doesn't receive the velocities of the pole either. Using recurrent biological circuitry, your brain finds the velocities and approximates an algorithm for solving the problem.</p>
 
+        <!--
         <div class="bg-red-100 border-l-4 border-red-500 p-4 mb-6">
             <p class="text-red-700">TODO: Add Weights & Biases training graph</p>
         </div>
@@ -102,6 +105,7 @@
         <div class="bg-red-100 border-l-4 border-red-500 p-4 mb-6">
             <p class="text-red-700">TODO: Add visualization of Cartpole without speed, memory heatmap, and playable demo</p>
         </div>
+    -->
     </section>
 
     <section class="mb-12">
