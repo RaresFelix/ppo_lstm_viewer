@@ -27,7 +27,7 @@ class AgentVisualization {
     }
 
     async loadRuns() {
-        const response = await fetch(`/static/runs/${this.taskType}/runs.json`);
+        const response = await fetch(`/ppo_lstm_viewer/static/runs/${this.taskType}/runs.json`);
         this.runs = await response.json();
         if (this.runs.length > 0) {
             // First load sparse frames for all runs
@@ -63,8 +63,8 @@ class AgentVisualization {
     async loadSingleFrame(runIndex, frame) {
         const run = this.runs[runIndex];
         const paddedFrame = String(frame).padStart(4, '0');
-        const mainUrl = `/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
-        const memoryUrl = `/static/runs/${this.taskType}/${run.id}/images/memory_${paddedFrame}.png`;
+        const mainUrl = `/ppo_lstm_viewer/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
+        const memoryUrl = `/ppo_lstm_viewer/static/runs/${this.taskType}/${run.id}/images/memory_${paddedFrame}.png`;
 
         const promises = [];
         for (const url of [mainUrl, memoryUrl]) {
@@ -120,7 +120,7 @@ class AgentVisualization {
         
         for (let frame = 0; frame < totalFrames; frame++) {
             const paddedFrame = String(frame).padStart(4, '0');
-            const mainUrl = `/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
+            const mainUrl = `/ppo_lstm_viewer/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
             
             if (!this.imageCache.has(mainUrl)) {
                 await this.loadSingleFrame(runIndex, frame);
@@ -167,8 +167,8 @@ class AgentVisualization {
         
         const paddedFrame = String(this.currentFrame).padStart(4, '0');
         
-        const mainUrl = `/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
-        const memoryUrl = `/static/runs/${this.taskType}/${run.id}/images/memory_${paddedFrame}.png`;
+        const mainUrl = `/ppo_lstm_viewer/static/runs/${this.taskType}/${run.id}/images/env_${paddedFrame}.png`;
+        const memoryUrl = `/ppo_lstm_viewer/static/runs/${this.taskType}/${run.id}/images/memory_${paddedFrame}.png`;
         
         // Use cached images
         if (this.imageCache.has(mainUrl)) {
@@ -183,8 +183,8 @@ class AgentVisualization {
             // Find nearest loaded frame
             const frame = this.findNearestLoadedFrame(run.id, this.currentFrame);
             const paddedNearestFrame = String(frame).padStart(4, '0');
-            const fallbackMainUrl = `/static/runs/${this.taskType}/${run.id}/images/env_${paddedNearestFrame}.png`;
-            const fallbackMemoryUrl = `/static/runs/${this.taskType}/${run.id}/images/memory_${paddedNearestFrame}.png`;
+            const fallbackMainUrl = `/ppo_lstm_viewer/static/runs/${this.taskType}/${run.id}/images/env_${paddedNearestFrame}.png`;
+            const fallbackMemoryUrl = `/ppo_lstm_viewer/static/runs/${this.taskType}/${run.id}/images/memory_${paddedNearestFrame}.png`;
             
             if (this.imageCache.has(fallbackMainUrl)) {
                 this.mainFrame.src = this.imageCache.get(fallbackMainUrl).src;
@@ -211,7 +211,7 @@ class AgentVisualization {
                 if (frame < 0) continue;
                 
                 const paddedFrame = String(frame).padStart(4, '0');
-                const url = `/static/runs/${this.taskType}/${runId}/images/env_${paddedFrame}.png`;
+                const url = `/ppo_lstm_viewer/static/runs/${this.taskType}/${runId}/images/env_${paddedFrame}.png`;
                 
                 if (this.imageCache.has(url)) {
                     return frame;
