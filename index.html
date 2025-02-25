@@ -58,7 +58,7 @@
             <a href="https://colab.research.google.com/github/RaresFelix/ppo_lstm/blob/main/PPO_LSTM_Games.ipynb" 
                target="_blank" 
                class="inline-flex items-center px-4 py-2 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                <img src="/ppo_lstm/static/images/colab.svg" alt="Colab logo" class="mr-2 h-4">
+                <img src="static/images/colab.svg" alt="Colab logo" class="mr-2 h-4" id="colab-icon">
                 Try in Colab Notebook
             </a>
         </div>
@@ -158,6 +158,46 @@
                     min="0" 
                     value="0"
                 >
+                <div class="flex justify-center items-center gap-2 mt-3">
+                    <button id="firstFrame_memory" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M.5 3.5A.5.5 0 0 1 1 4v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+                            <path d="M2.7 8.5 8 4.3v8.4L2.7 8.5z"/>
+                            <path d="M8.3 4.3 13.6 8.5 8.3 12.7V4.3z"/>
+                        </svg>
+                    </button>
+                    <button id="prevFrame_memory" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                    </button>
+                    <button id="playPause_memory" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" id="playIcon_memory">
+                            <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" id="pauseIcon_memory" style="display: none;">
+                            <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+                        </svg>
+                    </button>
+                    <button id="nextFrame_memory" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
+                    <button id="lastFrame_memory" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+                            <path d="M13.3 8.5 8 12.7V4.3l5.3 4.2z"/>
+                            <path d="M7.7 12.7 2.4 8.5 7.7 4.3v8.4z"/>
+                        </svg>
+                    </button>
+                    <select id="speed_memory" class="ml-2 px-2 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-300">
+                        <option value="2">0.5x</option>
+                        <option value="5" selected>1x</option>
+                        <option value="10">2x</option>
+                        <option value="15">3x</option>
+                    </select>
+                </div>
                 <div class="text-center mt-2">
                     Frame: <span id="frameNumber_memory">0</span> / <span id="maxFrame_memory">0</span>
                 </div>
@@ -222,6 +262,46 @@
                         min="0" 
                         value="0"
                     >
+                    <div class="flex justify-center items-center gap-2 mt-3">
+                        <button id="firstFrame_maze" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M.5 3.5A.5.5 0 0 1 1 4v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+                                <path d="M2.7 8.5 8 4.3v8.4L2.7 8.5z"/>
+                                <path d="M8.3 4.3 13.6 8.5 8.3 12.7V4.3z"/>
+                            </svg>
+                        </button>
+                        <button id="prevFrame_maze" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                            </svg>
+                        </button>
+                        <button id="playPause_maze" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" id="playIcon_maze">
+                                <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" id="pauseIcon_maze" style="display: none;">
+                                <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+                            </svg>
+                        </button>
+                        <button id="nextFrame_maze" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </button>
+                        <button id="lastFrame_maze" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+                                <path d="M13.3 8.5 8 12.7V4.3l5.3 4.2z"/>
+                                <path d="M7.7 12.7 2.4 8.5 7.7 4.3v8.4z"/>
+                            </svg>
+                        </button>
+                        <select id="speed_maze" class="ml-2 px-2 py-1 bg-gray-100 text-sm rounded text-gray-700 border border-gray-300">
+                            <option value="2">0.5x</option>
+                            <option value="5" selected>1x</option>
+                            <option value="10">2x</option>
+                            <option value="15">3x</option>
+                        </select>
+                    </div>
                     <div class="text-center mt-2">
                         Frame: <span id="frameNumber_maze">0</span> / <span id="maxFrame_maze">0</span>
                     </div>
@@ -250,8 +330,16 @@
     <script src="static/js/visualization.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize visualizations
         new AgentVisualization('memory');
         new AgentVisualization('maze');
+        
+        // Fix colab icon path for GitHub Pages
+        const path = window.location.pathname;
+        const colabIcon = document.getElementById('colab-icon');
+        if (colabIcon && path.includes('/ppo_lstm_viewer/')) {
+            colabIcon.src = '/ppo_lstm_viewer/static/images/colab.svg';
+        }
     });
     </script>
 </body>
